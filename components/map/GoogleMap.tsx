@@ -41,7 +41,7 @@ export default function GoogleMapDisplay({
     return (
       <div className="flex h-full w-full items-center justify-center rounded-lg border border-red-300 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
         <p className="text-red-700 dark:text-red-400">
-          Error loading Google Maps. Please check your API key.
+          <ErrorDisplay error="Error loading Google Maps. Please check your API key." />
         </p>
       </div>
     );

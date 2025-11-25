@@ -1,9 +1,9 @@
-import { MapObject, MapObjectType } from "@/lib/MapObject";
+import { MapObjectBuilder, MapObjectType } from "@/lib/MapObject";
 import SoldierMenu from "./SoldierMenu";
 
 interface MenuProps {
   className?: string;
-  mapObject?: MapObject;
+  mapObject?: MapObjectBuilder;
 }
 
 const Menu = ({ className = "", mapObject }: MenuProps) => {

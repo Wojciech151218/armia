@@ -1,12 +1,21 @@
 import MapContainer from "@/components/map/MapContainer";
+import { api } from "@/convex/_generated/api";
 import { MapObjectType } from "@/lib/MapObject";
+import { ConvexHttpClient } from "convex/browser";
+import type { Location } from "@/lib/Types";
 
-export default function Home() {
-  const objects = [{
-    objectType: MapObjectType.SOLDIER,
-    latitude: 52.2297,
-    longitude: 21.0122,
-  }];
+const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+
+
+export default async function Home() {
+  const soldiers = await convex.query(api.soldiers.listWithLocation);
+  const objects = soldiers
+    .filter((soldier): soldier is typeof soldier & { location: Location } => soldier.location !== null)
+    .map((soldier) => ({
+      objectType: MapObjectType.SOLDIER,
+      object: soldier,
+    }));
+
 
   return (
     <div className="h-[calc(100vh-4rem)] mt-8">

@@ -4,7 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import { OverlayView } from "@react-google-maps/api";
 import GoogleMapDisplay from "./GoogleMap";
 import MapObjectMapper from "../utils/MapObjectMapper";
-import { MapObject, MapObjectType } from "@/lib/MapObject";
+import { MapObject, MapObjectBuilder, MapObjectType } from "@/lib/MapObject";
 import AddButton from "./AddButton";
 
 const DEFAULT_CENTER = { lat: 52.2297, lng: 21.0122 }; // Warsaw fallback
@@ -14,7 +14,7 @@ interface MapObjectsMapProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   showDefaultMarkers?: boolean;
-  addObject: (object: MapObject) => void;
+  addObject: (object: MapObjectBuilder) => void;
 }
 
 const MapObjectsMap = ({
@@ -63,8 +63,8 @@ const MapObjectsMap = ({
 
     const aggregated = objects.reduce(
       (acc, object) => {
-        acc.lat += object.latitude;
-        acc.lng += object.longitude;
+        acc.lat += object.object.location.latitude;
+        acc.lng += object.object.location.longitude;
         return acc;
       },
       { lat: 0, lng: 0 }
@@ -78,8 +78,8 @@ const MapObjectsMap = ({
 
   const markers = showDefaultMarkers
     ? objects.map((object, index) => ({
-        lat: object.latitude,
-        lng: object.longitude,
+        lat: object.object.location.latitude,
+        lng: object.object.location.longitude,
         label: `${index + 1}`,
       }))
     : [];
@@ -89,8 +89,8 @@ const MapObjectsMap = ({
       <GoogleMapDisplay center={computedCenter} zoom={zoom} markers={markers} onMapClick={handleMapClick}>
         {objects.map((object, index) => (
           <OverlayView
-            key={`map-object-${index}-${object.latitude}-${object.longitude}`}
-            position={{ lat: object.latitude, lng: object.longitude }}
+            key={`map-object-${index}-${object.object.location.latitude}-${object.object.location.longitude}`}
+            position={{ lat: object.object.location.latitude, lng: object.object.location.longitude }}
             mapPaneName="overlayMouseTarget"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-md border border-zinc-200 bg-white/90 p-2 text-xs text-zinc-800 shadow-md backdrop-blur dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100">

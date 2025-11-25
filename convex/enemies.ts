@@ -45,6 +45,31 @@ export const list = query({
   },
 });
 
+// Read all enemies with their location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const enemies = await ctx.db.query("enemies").collect();
+      const locationIds = enemies
+        .map((enemy) => enemy.locationId)
+        .filter((locationId): locationId is Id<"locations"> => Boolean(locationId));
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return enemies.map((enemy) => ({
+        ...enemy,
+        location: enemy.locationId ? locationMap.get(enemy.locationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch enemies with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single enemy by ID
 export const get = query({
   args: {
@@ -59,6 +84,32 @@ export const get = query({
       return enemy;
     } catch (error) {
       throw new Error(`Failed to fetch enemy: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read an enemy with its location populated
+export const getWithLocation = query({
+  args: {
+    id: v.id("enemies"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const enemy = await ctx.db.get(args.id);
+      if (!enemy) {
+        throw new Error("Enemy not found");
+      }
+
+      const location = enemy.locationId ? await ctx.db.get(enemy.locationId) : null;
+
+      return {
+        ...enemy,
+        location,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch enemy with location: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

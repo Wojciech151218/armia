@@ -64,6 +64,31 @@ export const list = query({
   },
 });
 
+// Read all soldiers with their location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const soldiers = await ctx.db.query("soldiers").collect();
+      const locationIds = soldiers
+        .map((soldier) => soldier.locationId)
+        .filter((locationId): locationId is Id<"locations"> => Boolean(locationId));
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return soldiers.map((soldier) => ({
+        ...soldier,
+        location: soldier.locationId ? locationMap.get(soldier.locationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch soldiers with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single soldier by ID
 export const get = query({
   args: {
@@ -78,6 +103,32 @@ export const get = query({
       return soldier;
     } catch (error) {
       throw new Error(`Failed to fetch soldier: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read a single soldier by ID along with location details
+export const getWithLocation = query({
+  args: {
+    id: v.id("soldiers"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const soldier = await ctx.db.get(args.id);
+      if (!soldier) {
+        throw new Error("Soldier not found");
+      }
+
+      const location = soldier.locationId ? await ctx.db.get(soldier.locationId) : null;
+
+      return {
+        ...soldier,
+        location,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch soldier with location: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

@@ -68,6 +68,31 @@ export const list = query({
   },
 });
 
+// Read all missions with their location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const missions = await ctx.db.query("missions").collect();
+      const locationIds = missions
+        .map((mission) => mission.locationId)
+        .filter((locationId): locationId is Id<"locations"> => Boolean(locationId));
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return missions.map((mission) => ({
+        ...mission,
+        location: mission.locationId ? locationMap.get(mission.locationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch missions with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single mission by ID
 export const get = query({
   args: {
@@ -82,6 +107,32 @@ export const get = query({
       return mission;
     } catch (error) {
       throw new Error(`Failed to fetch mission: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read a mission with its location populated
+export const getWithLocation = query({
+  args: {
+    id: v.id("missions"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const mission = await ctx.db.get(args.id);
+      if (!mission) {
+        throw new Error("Mission not found");
+      }
+
+      const location = mission.locationId ? await ctx.db.get(mission.locationId) : null;
+
+      return {
+        ...mission,
+        location,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch mission with location: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

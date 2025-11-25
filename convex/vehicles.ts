@@ -59,6 +59,31 @@ export const list = query({
   },
 });
 
+// Read all vehicles with their location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const vehicles = await ctx.db.query("vehicles").collect();
+      const locationIds = vehicles
+        .map((vehicle) => vehicle.locationId)
+        .filter((locationId): locationId is Id<"locations"> => Boolean(locationId));
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return vehicles.map((vehicle) => ({
+        ...vehicle,
+        location: vehicle.locationId ? locationMap.get(vehicle.locationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch vehicles with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single vehicle by ID
 export const get = query({
   args: {
@@ -73,6 +98,32 @@ export const get = query({
       return vehicle;
     } catch (error) {
       throw new Error(`Failed to fetch vehicle: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read a single vehicle including its location details
+export const getWithLocation = query({
+  args: {
+    id: v.id("vehicles"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const vehicle = await ctx.db.get(args.id);
+      if (!vehicle) {
+        throw new Error("Vehicle not found");
+      }
+
+      const location = vehicle.locationId ? await ctx.db.get(vehicle.locationId) : null;
+
+      return {
+        ...vehicle,
+        location,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch vehicle with location: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

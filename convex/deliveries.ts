@@ -64,6 +64,38 @@ export const list = query({
   },
 });
 
+// Read all deliveries with their sender and receiver location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const deliveries = await ctx.db.query("deliveries").collect();
+
+      const locationIds = [
+        ...deliveries
+          .map((delivery) => delivery.senderLocationId)
+          .filter((locationId): locationId is Id<"locations"> => Boolean(locationId)),
+        ...deliveries
+          .map((delivery) => delivery.receiverLocationId)
+          .filter((locationId): locationId is Id<"locations"> => Boolean(locationId)),
+      ];
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return deliveries.map((delivery) => ({
+        ...delivery,
+        senderLocation: delivery.senderLocationId ? locationMap.get(delivery.senderLocationId) ?? null : null,
+        receiverLocation: delivery.receiverLocationId ? locationMap.get(delivery.receiverLocationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch deliveries with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single delivery by ID
 export const get = query({
   args: {
@@ -78,6 +110,34 @@ export const get = query({
       return delivery;
     } catch (error) {
       throw new Error(`Failed to fetch delivery: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read a delivery including its sender and receiver locations
+export const getWithLocation = query({
+  args: {
+    id: v.id("deliveries"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const delivery = await ctx.db.get(args.id);
+      if (!delivery) {
+        throw new Error("Delivery not found");
+      }
+
+      const senderLocation = delivery.senderLocationId ? await ctx.db.get(delivery.senderLocationId) : null;
+      const receiverLocation = delivery.receiverLocationId ? await ctx.db.get(delivery.receiverLocationId) : null;
+
+      return {
+        ...delivery,
+        senderLocation,
+        receiverLocation,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch delivery with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

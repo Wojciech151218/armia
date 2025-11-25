@@ -17,11 +17,11 @@ interface MapObjectMapperProps {
 const componentMap = {
   [MapObjectType.SOLDIER]: Soldier,
   [MapObjectType.VEHICLE]: Vehicle,
-  [MapObjectType.LOCATION]: Location,
+  //[MapObjectType.LOCATION]: Location,
   [MapObjectType.BASE]: Base,
-  [MapObjectType.MISSION]: Mission,
-  [MapObjectType.DELIVERY]: Delivery,
-  [MapObjectType.ENEMY]: Enemy,
+  //[MapObjectType.MISSION]: Mission,
+  //[MapObjectType.DELIVERY]: Delivery,
+  //[MapObjectType.ENEMY]: Enemy,
 };
 
 const MapObjectMapper = ({ objectType, ...props }: MapObjectMapperProps) => {

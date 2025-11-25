@@ -4,18 +4,20 @@ import { v } from "convex/values";
 // Create a new location
 export const create = mutation({
   args: {
-    coordinates: v.string(),
+    latitude: v.number(),
+    longitude: v.number(),
     name: v.optional(v.string()),
     type: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     try {
-      if (!args.coordinates || args.coordinates.trim().length === 0) {
-        throw new Error("Coordinates are required");
+      if (!args.latitude || !args.longitude) {
+        throw new Error("Latitude and longitude are required");
       }
 
       const locationId = await ctx.db.insert("locations", {
-        coordinates: args.coordinates.trim(),
+        latitude: args.latitude,
+        longitude: args.longitude,
         name: args.name?.trim(),
         type: args.type?.trim(),
       });

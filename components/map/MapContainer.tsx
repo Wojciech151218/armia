@@ -2,10 +2,10 @@
 import { useState } from "react";
 import MapObjectsMap from "./MapObjectsMap";
 import Menu from "./menu/Menu";
-import { MapObject } from "@/lib/MapObject";
+import { MapObject, MapObjectBuilder } from "@/lib/MapObject";
 
 interface MapContainerProps {
-  objects: Array<MapObject>;
+  objects: MapObject[];
   center?: { lat: number; lng: number };
   zoom?: number;
   title?: string;
@@ -17,9 +17,9 @@ const MapContainer = ({
   zoom = 10,
   title = "Map View",
 }: MapContainerProps) => {
-  const [activeObject, setActiveObject] = useState<MapObject | undefined>();
+  const [activeObject, setActiveObject] = useState<MapObjectBuilder | undefined>();
 
-  const handleAddObject = (object: MapObject) => {
+  const handleAddObject = (object: MapObjectBuilder) => {
     setActiveObject(object);
   };
   return (

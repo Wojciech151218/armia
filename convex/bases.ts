@@ -47,6 +47,31 @@ export const list = query({
   },
 });
 
+// Read all bases with their location documents
+export const listWithLocation = query({
+  handler: async (ctx) => {
+    try {
+      const bases = await ctx.db.query("bases").collect();
+      const locationIds = bases
+        .map((base) => base.locationId)
+        .filter((locationId): locationId is Id<"locations"> => Boolean(locationId));
+
+      const uniqueLocationIds = [...new Set(locationIds)];
+      const locationDocs = await Promise.all(uniqueLocationIds.map((locationId) => ctx.db.get(locationId)));
+      const locationMap = new Map(uniqueLocationIds.map((locationId, index) => [locationId, locationDocs[index]]));
+
+      return bases.map((base) => ({
+        ...base,
+        location: base.locationId ? locationMap.get(base.locationId) ?? null : null,
+      }));
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch bases with locations: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
+    }
+  },
+});
+
 // Read a single base by ID
 export const get = query({
   args: {
@@ -61,6 +86,32 @@ export const get = query({
       return base;
     } catch (error) {
       throw new Error(`Failed to fetch base: ${error instanceof Error ? error.message : "Unknown error"}`);
+    }
+  },
+});
+
+// Read a single base including its location details
+export const getWithLocation = query({
+  args: {
+    id: v.id("bases"),
+  },
+  handler: async (ctx, args) => {
+    try {
+      const base = await ctx.db.get(args.id);
+      if (!base) {
+        throw new Error("Base not found");
+      }
+
+      const location = base.locationId ? await ctx.db.get(base.locationId) : null;
+
+      return {
+        ...base,
+        location,
+      };
+    } catch (error) {
+      throw new Error(
+        `Failed to fetch base with location: ${error instanceof Error ? error.message : "Unknown error"}`,
+      );
     }
   },
 });

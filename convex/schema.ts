@@ -49,7 +49,8 @@ export default defineSchema({
 
   // Locations (Lokalizacja)
   locations: defineTable({
-    coordinates: v.string(), // Koordynaty (required) - e.g., "lat,lon" or JSON string
+    latitude: v.number(), 
+    longitude: v.number(), 
     name: v.optional(v.string()), // Nazwa (optional)
     type: v.optional(v.string()), // Typ (optional)
   }),
