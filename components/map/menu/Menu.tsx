@@ -6,7 +6,7 @@ interface MenuProps {
   className?: string;
   mapObject?: MapObjectBuilder;
   addObject: (object: MapObject) => void;
-  removeObject: (soldierId: Id<"soldiers">) => void;
+  removeObject: (soldierId: string) => void;
 }
 
 const Menu = ({ className = "", mapObject, addObject, removeObject }: MenuProps) => {
@@ -43,9 +43,9 @@ const Menu = ({ className = "", mapObject, addObject, removeObject }: MenuProps)
   };
 
   return (
-    <div className={`flex-1 rounded-lg bg-white p-6 shadow-md dark:bg-zinc-900 ${className}`}>
+    <div className={`flex-1 rounded-lg bg-white p-6 shadow-md dark:bg-zinc-900 overflow-y-auto scrollbar-custom ${className}`}>
       {renderContent()}
-    </div>
+    </div>                                
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-const Vehicle = () => {
+const VehicleIcon = () => {
   return (
     <div className="flex items-center justify-center">
       <svg
@@ -15,5 +15,5 @@ const Vehicle = () => {
   );
 };
 
-export default Vehicle;
+export default VehicleIcon;
 

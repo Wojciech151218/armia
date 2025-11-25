@@ -17,12 +17,10 @@ export default async function Home() {
 
 
   return (
-    <div className="h-[calc(100vh-4rem)] mt-8">
-      <MapContainer
-        objects={objects}
-        center={{ lat: 52.2297, lng: 21.0122 }}
-        zoom={10}
-      />
-    </div>
+    <MapContainer
+      objects={objects}
+      center={{ lat: 52.2297, lng: 21.0122 }}
+      zoom={10}
+    />
   );
 }

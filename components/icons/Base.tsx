@@ -1,6 +1,6 @@
 "use client";
 
-export const Base = () => {
+export const BaseIcon = () => {
   return (
     <div className="flex items-center justify-center">
       <svg
@@ -16,5 +16,5 @@ export const Base = () => {
   );
 };
 
-export default Base;
+export default BaseIcon;
 

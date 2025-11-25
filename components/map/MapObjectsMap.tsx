@@ -10,7 +10,7 @@ import AddButton from "./AddButton";
 const DEFAULT_CENTER = { lat: 52.2297, lng: 21.0122 }; // Warsaw fallback
 
 interface MapObjectsMapProps {
-  objects: Array<MapObject>;
+  mapObjects: Array<MapObject>;
   center?: { lat: number; lng: number };
   zoom?: number;
   showDefaultMarkers?: boolean;
@@ -18,12 +18,13 @@ interface MapObjectsMapProps {
 }
 
 const MapObjectsMap = ({
-  objects,
+  mapObjects,
   center,
   zoom = 10,
   showDefaultMarkers = false,
   buildObject,
 }: MapObjectsMapProps) => {
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pendingObjectType, setPendingObjectType] = useState<MapObjectType | null>(null);
 
@@ -57,44 +58,44 @@ const MapObjectsMap = ({
       return center;
     }
 
-    if (objects.length === 0) {
+    if (mapObjects.length === 0) {
       return DEFAULT_CENTER;
     }
 
-    const aggregated = objects.reduce(
-      (acc, object) => {
-        acc.lat += object.object.latitude;
-        acc.lng += object.object.longitude;
+    const aggregated = mapObjects.reduce(
+      (acc, mapObject) => {
+        acc.lat += mapObject.object.latitude;
+        acc.lng += mapObject.object.longitude;
         return acc;
       },
       { lat: 0, lng: 0 }
     );
 
     return {
-      lat: aggregated.lat / objects.length,
-      lng: aggregated.lng / objects.length,
+      lat: aggregated.lat / mapObjects.length,
+      lng: aggregated.lng / mapObjects.length,
     };
-  }, [center, objects]);
+  }, [center, mapObjects]);
 
   const markers = showDefaultMarkers
-    ? objects.map((object, index) => ({
-        lat: object.object.latitude,
-        lng: object.object.longitude,
+    ? mapObjects.map((mapObject, index) => ({
+        lat: mapObject.object.latitude,
+        lng: mapObject.object.longitude,
         label: `${index + 1}`,
       }))
     : [];
 
   return (
-    <div className="relative h-full w-full" style={{ cursor: 'crosshair' }}>
+    <div className="map-objects-map">
       <GoogleMapDisplay center={computedCenter} zoom={zoom} markers={markers} onMapClick={handleMapClick}>
-        {objects.map((object, index) => (
+        {mapObjects.map((mapObject, index) => (
           <OverlayView
-            key={`map-object-${index}-${object.object.latitude}-${object.object.longitude}`}
-            position={{ lat: object.object.latitude, lng: object.object.longitude }}
+            key={`map-object-${index}-${mapObject.object.latitude}-${mapObject.object.longitude}`}
+            position={{ lat: mapObject.object.latitude, lng: mapObject.object.longitude }}
             mapPaneName="overlayMouseTarget"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-md border border-zinc-200 bg-white/90 p-2 text-xs text-zinc-800 shadow-md backdrop-blur dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100">
-              <MapObjectMapper {...object} />
+            <div className="map-objects-map-marker">
+              <MapObjectMapper mapObject={mapObject} />
             </div>
           </OverlayView>
         ))}

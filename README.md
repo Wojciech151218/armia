@@ -1,6 +1,7 @@
 To start the program in development mode, run:
 
 ```
+npm install 
 npm run dev
 ```
 
@@ -13,7 +14,8 @@ CONVEX_DEPLOYMENT=anonymous:anonymous-backend
 
 NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:3211
 
-...
+NEXT_PUBLIC_GOOGLE_CLOUD_API_KEY=...
+
 ```
 
 Remember to restart the development server after making changes to `.env.local` for them to take effect.

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
@@ -31,6 +31,25 @@ const SoldierMenu = ({ latitude, longitude, addObject, removeObject }: SoldierMe
   const [editingId, setEditingId] = useState<Id<"soldiers"> | null>(null);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isFadingOut, setIsFadingOut] = useState(false);
+
+  // Auto-dismiss status messages after 3 seconds with fade-out
+  useEffect(() => {
+    if (status) {
+      setIsFadingOut(false);
+      const fadeTimer = setTimeout(() => {
+        setIsFadingOut(true);
+      }, 2500); // Start fading out at 2.5 seconds
+      const removeTimer = setTimeout(() => {
+        setStatus(null);
+        setIsFadingOut(false);
+      }, 3000); // Remove after 3 seconds
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(removeTimer);
+      };
+    }
+  }, [status]);
 
   const soldiersData = useQuery(api.soldiers.list);
   const soldiers = soldiersData ?? [];
@@ -227,7 +246,9 @@ const SoldierMenu = ({ latitude, longitude, addObject, removeObject }: SoldierMe
 
         {status && (
           <div
-            className={`rounded-xl border px-3 py-2 text-sm ${
+            className={`rounded-xl border px-3 py-2 text-sm transition-opacity duration-500 ${
+              isFadingOut ? "opacity-0" : "opacity-100"
+            } ${
               status.type === "error"
                 ? "border-red-200 bg-red-50 text-red-700 dark:border-red-500/40 dark:bg-red-500/10 dark:text-red-200"
                 : "border-emerald-200 bg-emerald-50 text-emerald-800 dark:border-emerald-500/40 dark:bg-emerald-500/10 dark:text-emerald-100"

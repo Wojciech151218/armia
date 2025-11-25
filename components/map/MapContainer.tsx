@@ -31,22 +31,20 @@ const MapContainer = ({
     setObjects(objects.filter((o) => o.object._id !== id));
   };
   return (
-    <div className="flex h-full gap-4">
-      {/* Left Menu */}
-      <Menu className="flex-1" 
-        mapObject={activeObject} 
-        addObject={handleAddObject} 
-        removeObject={handleRemoveObject}
-      />
+    <div className="map-layout">
+      <div className="map-layout-menu scrollbar-custom">
+        <Menu
+          mapObject={activeObject}
+          addObject={handleAddObject}
+          removeObject={handleRemoveObject}
+        />
+      </div>
 
-      {/* Right Map - Square shape constrained by height */}
-      <div className="h-full aspect-square rounded-lg bg-white p-6 shadow-md dark:bg-zinc-900 overflow-hidden flex-shrink-0">
-        <h2 className="mb-4 text-2xl font-semibold text-black dark:text-zinc-50 text-center">
-          {title}
-        </h2>
-        <div className="h-[calc(100%-4rem)] overflow-hidden rounded-lg">
+      <div className="map-layout-map">
+        <h2 className="map-layout-title">{title}</h2>
+        <div className="map-layout-map-inner">
           <MapObjectsMap
-            objects={objects}
+            mapObjects={objects}
             center={center}
             zoom={zoom}
             buildObject={handleBuildObject}

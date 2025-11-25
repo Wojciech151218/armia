@@ -1,32 +1,23 @@
 "use client";
 
-import { MapObjectType } from "@/lib/MapObject";
-import Soldier from "@/components/map-objects/Soldier";
-import Vehicle from "@/components/map-objects/Vehicle";
-import Location from "@/components/map-objects/Location";
-import Base from "@/components/map-objects/Base";
-import Mission from "@/components/map-objects/Mission";
-import Delivery from "@/components/map-objects/Delivery";
-import Enemy from "@/components/map-objects/Enemy";
+import { MapObjectType, MapObject } from "@/lib/MapObject";
+import SoldierIcon from "@/components/icons/Soldier";
+import VehicleIcon from "@/components/icons/Vehicle";
+import LocationIcon from "@/components/icons/Location";
+import Base from "@/components/icons/Base";
 
-interface MapObjectMapperProps {
-  objectType: MapObjectType;
-  [key: string]: any; // Allow additional props to be passed through
-}
 
-const componentMap = {
-  [MapObjectType.SOLDIER]: Soldier,
-  [MapObjectType.VEHICLE]: Vehicle,
-  //[MapObjectType.LOCATION]: Location,
+type ObjectIconType = (object: any) => React.ReactNode;
+  
+const componentMap : Record<MapObjectType, ObjectIconType> = {
+  [MapObjectType.SOLDIER]: SoldierIcon,
+  [MapObjectType.VEHICLE]: VehicleIcon,
   [MapObjectType.BASE]: Base,
-  //[MapObjectType.MISSION]: Mission,
-  //[MapObjectType.DELIVERY]: Delivery,
-  //[MapObjectType.ENEMY]: Enemy,
 };
 
-const MapObjectMapper = ({ objectType, ...props }: MapObjectMapperProps) => {
-  const Component = componentMap[objectType];
-  return Component ? <Component {...props} /> : <div>Unknown object type</div>;
+const MapObjectMapper = ({ mapObject }: { mapObject: MapObject }) => {
+  const Component = componentMap[mapObject.objectType];
+  return Component ? <Component object={mapObject.object} /> : <div>Unknown object type</div>;
 };
 
 export default MapObjectMapper;
