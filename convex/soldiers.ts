@@ -1,32 +1,48 @@
+import { Id } from "./_generated/dataModel";
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 // Create a new soldier
 export const create = mutation({
   args: {
-    name: v.string(),
-    rank: v.string(),
-    unit: v.string(),
-    status: v.union(v.literal("active"), v.literal("inactive"), v.literal("reserve")),
+    firstName: v.string(),
+    lastName: v.string(),
+    rank: v.optional(v.string()),
+    unitId: v.optional(v.id("units")),
+    locationId: v.optional(v.id("locations")),
   },
   handler: async (ctx, args) => {
     try {
       // Validate input
-      if (!args.name || args.name.trim().length === 0) {
-        throw new Error("Name is required");
+      if (!args.firstName || args.firstName.trim().length === 0) {
+        throw new Error("First name is required");
       }
-      if (!args.rank || args.rank.trim().length === 0) {
-        throw new Error("Rank is required");
+      if (!args.lastName || args.lastName.trim().length === 0) {
+        throw new Error("Last name is required");
       }
-      if (!args.unit || args.unit.trim().length === 0) {
-        throw new Error("Unit is required");
+
+      // Validate unit exists if provided
+      if (args.unitId) {
+        const unit = await ctx.db.get(args.unitId);
+        if (!unit) {
+          throw new Error("Unit not found");
+        }
+      }
+
+      // Validate location exists if provided
+      if (args.locationId) {
+        const location = await ctx.db.get(args.locationId);
+        if (!location) {
+          throw new Error("Location not found");
+        }
       }
 
       const soldierId = await ctx.db.insert("soldiers", {
-        name: args.name.trim(),
-        rank: args.rank.trim(),
-        unit: args.unit.trim(),
-        status: args.status,
+        firstName: args.firstName.trim(),
+        lastName: args.lastName.trim(),
+        rank: args.rank?.trim(),
+        unitId: args.unitId,
+        locationId: args.locationId,
       });
 
       return soldierId;
@@ -70,10 +86,11 @@ export const get = query({
 export const update = mutation({
   args: {
     id: v.id("soldiers"),
-    name: v.optional(v.string()),
+    firstName: v.optional(v.string()),
+    lastName: v.optional(v.string()),
     rank: v.optional(v.string()),
-    unit: v.optional(v.string()),
-    status: v.optional(v.union(v.literal("active"), v.literal("inactive"), v.literal("reserve"))),
+    unitId: v.optional(v.id("units")),
+    locationId: v.optional(v.id("locations")),
   },
   handler: async (ctx, args) => {
     try {
@@ -83,32 +100,45 @@ export const update = mutation({
       }
 
       const updates: {
-        name?: string;
+        firstName?: string;
+        lastName?: string;
         rank?: string;
-        unit?: string;
-        status?: "active" | "inactive" | "reserve";
+        unitId?: Id<"units">;
+        locationId?: Id<"locations">;
       } = {};
 
-      if (args.name !== undefined) {
-        if (args.name.trim().length === 0) {
-          throw new Error("Name cannot be empty");
+      if (args.firstName !== undefined) {
+        if (args.firstName.trim().length === 0) {
+          throw new Error("First name cannot be empty");
         }
-        updates.name = args.name.trim();
+        updates.firstName = args.firstName.trim();
+      }
+      if (args.lastName !== undefined) {
+        if (args.lastName.trim().length === 0) {
+          throw new Error("Last name cannot be empty");
+        }
+        updates.lastName = args.lastName.trim();
       }
       if (args.rank !== undefined) {
-        if (args.rank.trim().length === 0) {
-          throw new Error("Rank cannot be empty");
-        }
-        updates.rank = args.rank.trim();
+        updates.rank = args.rank.trim() || undefined;
       }
-      if (args.unit !== undefined) {
-        if (args.unit.trim().length === 0) {
-          throw new Error("Unit cannot be empty");
+      if (args.unitId !== undefined) {
+        if (args.unitId) {
+          const unit = await ctx.db.get(args.unitId);
+          if (!unit) {
+            throw new Error("Unit not found");
+          }
         }
-        updates.unit = args.unit.trim();
+        updates.unitId = args.unitId;
       }
-      if (args.status !== undefined) {
-        updates.status = args.status;
+      if (args.locationId !== undefined) {
+        if (args.locationId) {
+          const location = await ctx.db.get(args.locationId);
+          if (!location) {
+            throw new Error("Location not found");
+          }
+        }
+        updates.locationId = args.locationId;
       }
 
       await ctx.db.patch(args.id, updates);

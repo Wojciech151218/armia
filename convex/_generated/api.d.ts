@@ -8,7 +8,16 @@
  * @module
  */
 
+import type * as armaments from "../armaments.js";
+import type * as bases from "../bases.js";
+import type * as deliveries from "../deliveries.js";
+import type * as enemies from "../enemies.js";
+import type * as events from "../events.js";
+import type * as locations from "../locations.js";
+import type * as missions from "../missions.js";
 import type * as soldiers from "../soldiers.js";
+import type * as units from "../units.js";
+import type * as vehicles from "../vehicles.js";
 
 import type {
   ApiFromModules,
@@ -17,7 +26,16 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  armaments: typeof armaments;
+  bases: typeof bases;
+  deliveries: typeof deliveries;
+  enemies: typeof enemies;
+  events: typeof events;
+  locations: typeof locations;
+  missions: typeof missions;
   soldiers: typeof soldiers;
+  units: typeof units;
+  vehicles: typeof vehicles;
 }>;
 
 /**
