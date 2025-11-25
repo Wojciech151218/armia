@@ -24,3 +24,10 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Crosshair cursor for Google Maps */
+.gm-style,
+.gm-style > div,
+.gm-style > div > div {
+  cursor: crosshair !important;
+}
