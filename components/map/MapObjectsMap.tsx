@@ -14,7 +14,7 @@ interface MapObjectsMapProps {
   center?: { lat: number; lng: number };
   zoom?: number;
   showDefaultMarkers?: boolean;
-  addObject: (object: MapObjectBuilder) => void;
+  buildObject: (object: MapObjectBuilder) => void;
 }
 
 const MapObjectsMap = ({
@@ -22,7 +22,7 @@ const MapObjectsMap = ({
   center,
   zoom = 10,
   showDefaultMarkers = false,
-  addObject,
+  buildObject,
 }: MapObjectsMapProps) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [pendingObjectType, setPendingObjectType] = useState<MapObjectType | null>(null);
@@ -42,14 +42,14 @@ const MapObjectsMap = ({
         return;
       }
 
-      addObject({
+      buildObject({
         objectType: pendingObjectType,
         latitude: event.latLng.lat(),
         longitude: event.latLng.lng(),
       });
 
     },
-    [addObject, pendingObjectType]
+    [buildObject, pendingObjectType]
   );
 
   const computedCenter = useMemo(() => {
@@ -63,8 +63,8 @@ const MapObjectsMap = ({
 
     const aggregated = objects.reduce(
       (acc, object) => {
-        acc.lat += object.object.location.latitude;
-        acc.lng += object.object.location.longitude;
+        acc.lat += object.object.latitude;
+        acc.lng += object.object.longitude;
         return acc;
       },
       { lat: 0, lng: 0 }
@@ -78,8 +78,8 @@ const MapObjectsMap = ({
 
   const markers = showDefaultMarkers
     ? objects.map((object, index) => ({
-        lat: object.object.location.latitude,
-        lng: object.object.location.longitude,
+        lat: object.object.latitude,
+        lng: object.object.longitude,
         label: `${index + 1}`,
       }))
     : [];
@@ -89,8 +89,8 @@ const MapObjectsMap = ({
       <GoogleMapDisplay center={computedCenter} zoom={zoom} markers={markers} onMapClick={handleMapClick}>
         {objects.map((object, index) => (
           <OverlayView
-            key={`map-object-${index}-${object.object.location.latitude}-${object.object.location.longitude}`}
-            position={{ lat: object.object.location.latitude, lng: object.object.location.longitude }}
+            key={`map-object-${index}-${object.object.latitude}-${object.object.longitude}`}
+            position={{ lat: object.object.latitude, lng: object.object.longitude }}
             mapPaneName="overlayMouseTarget"
           >
             <div className="flex h-12 w-12 items-center justify-center rounded-md border border-zinc-200 bg-white/90 p-2 text-xs text-zinc-800 shadow-md backdrop-blur dark:border-zinc-700 dark:bg-zinc-900/80 dark:text-zinc-100">

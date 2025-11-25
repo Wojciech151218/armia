@@ -13,7 +13,6 @@ import type * as bases from "../bases.js";
 import type * as deliveries from "../deliveries.js";
 import type * as enemies from "../enemies.js";
 import type * as events from "../events.js";
-import type * as locations from "../locations.js";
 import type * as missions from "../missions.js";
 import type * as soldiers from "../soldiers.js";
 import type * as units from "../units.js";
@@ -31,7 +30,6 @@ declare const fullApi: ApiFromModules<{
   deliveries: typeof deliveries;
   enemies: typeof enemies;
   events: typeof events;
-  locations: typeof locations;
   missions: typeof missions;
   soldiers: typeof soldiers;
   units: typeof units;

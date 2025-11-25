@@ -1,12 +1,15 @@
-import { MapObjectBuilder, MapObjectType } from "@/lib/MapObject";
+import { MapObject, MapObjectBuilder, MapObjectType } from "@/lib/MapObject";
 import SoldierMenu from "./SoldierMenu";
+import { Id } from "@/convex/_generated/dataModel";
 
 interface MenuProps {
   className?: string;
   mapObject?: MapObjectBuilder;
+  addObject: (object: MapObject) => void;
+  removeObject: (soldierId: Id<"soldiers">) => void;
 }
 
-const Menu = ({ className = "", mapObject }: MenuProps) => {
+const Menu = ({ className = "", mapObject, addObject, removeObject }: MenuProps) => {
   const menuType = mapObject?.objectType;
 
   const renderContent = () => {
@@ -23,7 +26,9 @@ const Menu = ({ className = "", mapObject }: MenuProps) => {
 
     if (menuType === MapObjectType.SOLDIER) {
       return (
-        <SoldierMenu latitude={mapObject?.latitude} longitude={mapObject?.longitude} />
+        <SoldierMenu 
+        latitude={mapObject?.latitude} longitude={mapObject?.longitude} 
+        addObject={addObject} removeObject={removeObject} />
       );
     }
 

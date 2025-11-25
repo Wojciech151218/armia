@@ -1,4 +1,4 @@
-import { Delivery, Base, Location, Mission, Vehicle, Enemy, Unit, Soldier } from "./Types";
+import { Delivery, Base, Mission, Vehicle, Enemy, Unit, Soldier } from "./Types";
 
 
 export enum MapObjectType {
@@ -9,7 +9,7 @@ export enum MapObjectType {
 }
 export interface MapObject {
     objectType: MapObjectType;
-    object : ( Soldier | Vehicle | Base ) & {location: Location} 
+    object : ( Soldier | Vehicle | Base ) 
 }   
 
 export interface MapObjectBuilder {

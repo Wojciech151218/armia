@@ -4,10 +4,14 @@ import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Doc, Id } from "@/convex/_generated/dataModel";
+import { MapObject, MapObjectType } from "@/lib/MapObject";
+import { Soldier } from "@/lib/Types";
 
 interface SoldierMenuProps {
-  latitude?: number;
-  longitude?: number;
+  latitude: number;
+  longitude: number;
+  addObject: (object: MapObject) => void;
+  removeObject: (soldierId: Id<"soldiers">) => void;
 }
 
 type FormState = {
@@ -22,7 +26,7 @@ const initialFormState: FormState = {
   rank: "",
 };
 
-const SoldierMenu = ({ latitude, longitude }: SoldierMenuProps) => {
+const SoldierMenu = ({ latitude, longitude, addObject, removeObject }: SoldierMenuProps) => {
   const [form, setForm] = useState<FormState>(initialFormState);
   const [editingId, setEditingId] = useState<Id<"soldiers"> | null>(null);
   const [status, setStatus] = useState<{ type: "success" | "error"; message: string } | null>(null);
@@ -36,15 +40,12 @@ const SoldierMenu = ({ latitude, longitude }: SoldierMenuProps) => {
   const updateSoldier = useMutation(api.soldiers.update);
   const removeSoldier = useMutation(api.soldiers.remove);
 
-  const hasCoordinates = typeof latitude === "number" && typeof longitude === "number";
+
 
   const coordinateLabel = useMemo(() => {
-    if (!hasCoordinates || latitude === undefined || longitude === undefined) {
-      return "Click anywhere on the map to capture coordinates";
-    }
 
     return `${latitude.toFixed(4)}°, ${longitude.toFixed(4)}°`;
-  }, [hasCoordinates, latitude, longitude]);
+  }, [latitude, longitude]);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -84,20 +85,39 @@ const SoldierMenu = ({ latitude, longitude }: SoldierMenuProps) => {
     setStatus(null);
 
     try {
+
+      // Create location if coordinates are available
+      if (latitude !== undefined && longitude !== undefined) {
+        
+      }
+
       if (editingId) {
-        await updateSoldier({
+        const soldier = await updateSoldier({
           id: editingId,
           firstName,
           lastName,
-          ...(rank ? { rank } : {}),
+          rank: rank ?? undefined,
+          latitude,
+          longitude,
+        });
+        addObject({
+          objectType: MapObjectType.SOLDIER,
+          object: soldier as Soldier,
         });
         setStatus({ type: "success", message: "Soldier updated successfully." });
       } else {
-        await createSoldier({
+        const soldier = await createSoldier({
           firstName,
           lastName,
-          ...(rank ? { rank } : {}),
+          rank: rank ?? undefined,
+          latitude,
+          longitude,
         });
+        addObject({
+          objectType: MapObjectType.SOLDIER,
+          object: soldier as Soldier,
+        });
+
         setStatus({ type: "success", message: "Soldier created successfully." });
       }
       resetForm();
@@ -114,10 +134,11 @@ const SoldierMenu = ({ latitude, longitude }: SoldierMenuProps) => {
   const handleDelete = async (id: Id<"soldiers">) => {
     setStatus(null);
     try {
-      await removeSoldier({ id });
+      await removeSoldier({ id: id });
       if (editingId === id) {
         resetForm();
       }
+      removeObject(id);
       setStatus({ type: "success", message: "Soldier removed from roster." });
     } catch (error) {
       setStatus({
@@ -136,14 +157,12 @@ const SoldierMenu = ({ latitude, longitude }: SoldierMenuProps) => {
         <div className="mt-2 flex items-center justify-between gap-4">
           <p className="text-2xl font-semibold text-zinc-900 dark:text-white">{coordinateLabel}</p>
           <span
-            className={`rounded-full px-4 py-1 text-xs font-semibold ${
-              hasCoordinates
-                ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200"
-                : "bg-zinc-100 text-zinc-500 dark:bg-zinc-800 dark:text-zinc-400"
-            }`}
+            className="rounded-full px-4 py-1 text-xs font-semibold 
+            bg-emerald-100 text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200"
+                
           >
-            {hasCoordinates ? "Ready to deploy" : "Awaiting point"}
-          </span>
+            Ready to deploy
+          </span>  
         </div>
       </div>
 

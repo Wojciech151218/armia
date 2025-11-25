@@ -1,6 +1,12 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+export const location = {
+  latitude: v.number(),
+  longitude: v.number(),
+
+}
+
 export default defineSchema({
   // Units (Jednostka)
   units: defineTable({
@@ -17,7 +23,7 @@ export default defineSchema({
     lastName: v.string(), // Nazwisko (required)
     rank: v.optional(v.string()), // Ranga (optional)
     unitId: v.optional(v.id("units")), // Unit the soldier belongs to
-    locationId: v.optional(v.id("locations")), // Current location
+    ...location,
   }),
 
   // Armaments (Uzbrojenie)
@@ -37,30 +43,24 @@ export default defineSchema({
     end: v.optional(v.string()), // Koniec (optional) - ISO date string
     status: v.string(), // Status (required)
     unitId: v.optional(v.id("units")), // Unit assigned to this mission
-    locationId: v.optional(v.id("locations")), // Location where mission takes place
+    ...location,
   }),
 
   // Bases (Baza)
   bases: defineTable({
     name: v.string(), // Nazwa (required)
     capacity: v.optional(v.number()), // Pojemność (optional)
-    locationId: v.optional(v.id("locations")), // Location of the base
+    ...location,
   }),
 
-  // Locations (Lokalizacja)
-  locations: defineTable({
-    latitude: v.number(), 
-    longitude: v.number(), 
-    name: v.optional(v.string()), // Nazwa (optional)
-    type: v.optional(v.string()), // Typ (optional)
-  }),
+  
 
   // Vehicles (Pojazd)
   vehicles: defineTable({
     type: v.string(), // Typ (required)
     status: v.string(), // Status (required)
     unitId: v.optional(v.id("units")), // Unit that owns this vehicle
-    locationId: v.optional(v.id("locations")), // Current location
+    ...location,
   }),
 
   // Events (Wydarzenie)
@@ -76,8 +76,8 @@ export default defineSchema({
     type: v.string(), // Typ (required)
     quantity: v.number(), // Ilość (required)
     status: v.string(), // Status (required)
-    senderLocationId: v.optional(v.id("locations")), // Location of sender
-    receiverLocationId: v.optional(v.id("locations")), // Location of receiver
+    senderLocation: v.object(location), // Location of sender
+    receiverLocation: v.object(location), // Location of receiver
   }),
 
   // Enemies (Wróg)
@@ -85,7 +85,7 @@ export default defineSchema({
     type: v.optional(v.string()), // Typ (optional)
     estimatedStrength: v.optional(v.number()), // OszacowanaSila (optional)
     threatLevel: v.optional(v.string()), // StopieńZagrożenia (optional)
-    locationId: v.optional(v.id("locations")), // Location where enemy is/was located
+    ...location,
   }),
 });
 
