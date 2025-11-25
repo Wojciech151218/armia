@@ -18,4 +18,10 @@ NEXT_PUBLIC_GOOGLE_CLOUD_API_KEY=...
 
 ```
 
+Project structure (brief):
+- `app/` – Next.js routes, layouts, global styles, and main pages.
+- `components/` – Reusable UI elements (map, menus, icons, utilities).
+- `convex/` – Convex backend functions, schema, and generated API types.
+- `lib/` – Shared domain models and TypeScript types.
+
 Remember to restart the development server after making changes to `.env.local` for them to take effect.
